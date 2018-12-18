@@ -25,18 +25,15 @@ typedef struct _tree
 	CompareKeyFunction	compare_keys;
 	/* *** complete the definition of the tree structure *** */
 } Tree;
-
+pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
 pTree TreeCreate(CloneFunction clone_element, DelFunction delete_element, OperateFunction operate_on_elements, GetKeyFunction get_elements_key, CompareKeyFunction compare_keys)
 {
+	if (clone_element == NULL || delete_element == NULL || operate_on_elements == NULL || get_elements_key == NULL || compare_keys == NULL) return NULL; 
 	pTree p_new_tree;
-	//pNode p_node;
+
 	p_new_tree = (pTree)malloc(sizeof(Tree));
-	//p_node = (pNode)malloc(sizeof(Node));
-	if (p_new_tree == NULL/* || p_node == NULL*/) return NULL;
-	p_node->elem = NULL;
-	p_node->leftChild = NULL;
-	p_node->rightChild = NULL;
-	p_new_tree->root = p_node;
+	if (p_new_tree == NULL) return NULL;
+	p_new_tree->root = NULL;
 	p_new_tree->clone_element = clone_element;
 	p_new_tree->delete_element = delete_element;
 	p_new_tree->operate_on_elements = operate_on_elements;
@@ -51,12 +48,75 @@ void TreeDestroy(pTree p_tree)
 			return;		
 }
 
-pNode TreeAddRoot(pNode p_node, pTree p_tree)
+pNode TreeAddRoot(pElement p_elem, pTree p_tree)
 {
-	p_tree->root = p_tree->clone_element(p_node);//memory was allocated
-	if (p_tree->root == NULL) return NULL;
+	if (p_tree == NULL || p_elem == NULL ) return NULL;
+	pNode p_new_node;
+	p_new_node = (pNode)malloc(sizeof(Node));
+	if (p_new_node == NULL) return NULL;
+	p_tree->root = p_new_node;
+	p_new_node->elem = p_tree->clone_element(p_elem);//memory was allocated
+	if (p_new_node->elem == NULL)
+	{
+		free(p_new_node);
+		return NULL;
+	}
+	p_new_node->leftChild = NULL;
+	p_new_node->rightChild = NULL;
 	return p_tree->root;
 }
 
-pNode TreeAddLeftChild(pTree p_tree , pNode p_node , pElement p_elem)
+pNode TreeAddLeftChild(pTree p_tree, pNode p_node, pElement p_elem)
+{
+	if (p_tree == NULL || p_node == NULL || p_elem == NULL) return NULL;
+	pNode p_new_node;
+	p_new_node = (pNode)malloc(sizeof(Node));
+	if (p_new_node == NULL)return NULL;
+	p_new_node->elem = p_tree->clone_element(p_elem);//memory was allocated
+	if (p_new_node->elem == NULL)
+	{
+		free(p_new_node);
+		return NULL;
+	}
+	p_new_node->leftChild = NULL;
+	p_new_node->rightChild = NULL;
+	p_node->leftChild = p_new_node;
+	return p_new_node;
+}
 
+pNode TreeAddRightChild(pTree p_tree, pNode p_node, pElement p_elem)
+{
+	if (p_tree == NULL || p_node == NULL || p_elem == NULL) return NULL;
+	pNode p_new_node;
+	p_new_node = (pNode)malloc(sizeof(Node));
+	if (p_new_node == NULL)return NULL;
+	p_new_node->elem = p_tree->clone_element(p_elem);//memory was allocated
+	if (p_new_node->elem == NULL)
+	{
+		free(p_new_node);
+		return NULL;
+	}
+	p_new_node->leftChild = NULL;
+	p_new_node->rightChild = NULL;
+	p_node->rightChild = p_new_node;
+	return p_new_node;
+}
+
+pElement TreeFindElement(pTree p_tree, pKey p_key)
+{
+	if (p_tree == NULL || p_key == NULL) return NULL;
+	return recursive_find_element(p_tree, p_tree->root , p_key);
+}
+
+
+pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
+{
+	pElement p_left, p_right;
+	if (p_node == NULL)return NULL;
+	if (p_tree->CompareKeyFunction(p_key, p_tree->get_elements_key(p_node))) return p_node->elem;
+	p_left = recursive_find_element(p_tree, p_node->leftChild, p_key);
+	p_right = recursive_find_element(p_tree, p_node->rightChild, p_key);
+	if (p_left != NULL) return p_left;
+	if (p_right != NULL) return p_right;
+	return NULL;
+}
