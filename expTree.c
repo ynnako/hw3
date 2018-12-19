@@ -6,6 +6,7 @@
 
 
 pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
+pElement recursive_eval(pTree p_tree, pNode p_node, pKey p_key);
 /* definition of a node in the tree */
 typedef struct _node
 {
@@ -123,4 +124,16 @@ pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
 	return NULL;
 }
 
-pElement TreeEvaluate()
+pElement TreeEvaluate(pTree p_tree)
+{
+	if (p_tree == NULL || p_tree->root == NULL) return NULL;
+	return recursive_eval(p_tree, p_tree->root);
+}
+
+pElement recursive_eval(pTree p_tree, pNode p_node)
+{
+	if (p_node->leftChild == NULL || p_node->rightChild == NULL) return p_node->elem;
+	pElement resL = recursive_eval(p_tree, p_node->leftChild);
+	pElement resR = recursive_eval(p_tree, p_node->rightChild);
+	return p_tree->operate_on_elements(p_node->elem, resL, resR);
+}
