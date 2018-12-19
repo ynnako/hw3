@@ -6,26 +6,51 @@
 #include "defs.h"
 #include "expTree.h"
 
+CloneFunction name_clone(pElement e)
+{
 
-Result InitExpression(char* exp);
+}
+
+DelFunction neme_del(pElement e)
+{
+
+}
+
+OperateFunction name_op(pElement op, pElement left, pElement right)
+{
+
+}
+
+GetKeyFunction name_get(pElement elem)
+{
+
+}
+
+CompareKeyFunction name_compare(const pKey key1, const pKey key2)
+{
+
+}
+
+Result InitExpression(char* exp)
+{
+
+}
 
 /* Set symbol value */
-Result SetSymbolVal(char* symName, float val);
+Result SetSymbolVal(char* symName, float val)
+{
+
+}
 
 /* Evaluate expression */
-Result EvaluateExpression(float *res);
+Result EvaluateExpression(float *res)
+{
+
+}
 
 /* Destroy expression */
-void DeleteExpression();
+void DeleteExpression()
+{
 
-pElement(*CloneFunction)(pElement e);
+}
 
-void(*DelFunction)(pElement e);
-
-pElement(*OperateFunction)(pElement op,
-	pElement left,
-	pElement right);
-
-pKey(*GetKeyFunction)(pElement elem);
-
-Bool(*CompareKeyFunction)(const pKey key1, const pKey key2);
