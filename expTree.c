@@ -4,9 +4,12 @@
 #include "defs.h"
 #include "expTree.h"
 
-
+//assitive functions declerations//
 pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
 pElement recursive_eval(pTree p_tree, pNode p_node, pKey p_key);
+//-------------------------------//
+
+
 /* definition of a node in the tree */
 typedef struct _node
 {
@@ -128,8 +131,23 @@ pElement TreeFindElement(pTree p_tree, pKey p_key)
 	return recursive_find_element(p_tree, p_tree->root , p_key);
 }
 
+pElement TreeEvaluate(pTree p_tree)
+{
+	if (p_tree == NULL || p_tree->root == NULL) return NULL;
+	return recursive_eval(p_tree, p_tree->root);
+}
 
-pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
+
+// asistive functions implementation
+pElement recursive_eval(pTree p_tree,pNode p_node)
+{
+	if(p_node->leftChild==NULL || p_node->rightChild==NULL) return p_node->elem;
+	pElement Result_left =recursive_eval(p_tree,p_node->leftChild);
+	pElement Result_right =recursive_eval(p_tree,p_node->rightChild);
+	return p_tree->operate_on_elements(p_node->elem,Result_left,Result_right);
+}
+
+pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key)
 {
 	pElement p_left, p_right;
 	if (p_node == NULL)return NULL;
@@ -139,18 +157,4 @@ pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
 	if (p_left != NULL) return p_left;
 	if (p_right != NULL) return p_right;
 	return NULL;
-}
-
-pElement TreeEvaluate(pTree p_tree)
-{
-	if (p_tree == NULL || p_tree->root == NULL) return NULL;
-	return TreeEvaluateWrap(p_tree, p_tree->root);
-}
-
-pElement TreeEvaluateWrap(pTree p_tree,pNode p_node)
-{
-	if(p_node->leftChild==NULL || p_node->rightChild==NULL) return p_node->elem;
-	 pElement Result_left =TreeEvaluateWrap(p_tree,p_node->leftChild);
-	 pElement Result_right =TreeEvaluateWrap(p_tree,p_node->rightChild);
-	 return p_tree->operate_on_elements(p_node->elem,Result_left,Result_right);
 }
