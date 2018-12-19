@@ -5,8 +5,9 @@
 #include "expTree.h"
 
 //assitive functions declerations//
-pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
+pElement recursive_find_element(pTree p_tree, pNode p_node);
 pElement recursive_eval(pTree p_tree, pNode p_node, pKey p_key);
+void TreeDestroyWrap(pTree p_tree, pNode p_node);
 //-------------------------------//
 
 
@@ -52,6 +53,7 @@ pTree TreeCreate(CloneFunction clone_element, DelFunction delete_element, Operat
 void TreeDestroy(pTree p_tree)
 
 {		
+	if (p_tree == NULL) return;
 	TreeDestroyWrap( p_tree,p_tree->root);
 	return;		
 }
@@ -67,7 +69,6 @@ void TreeDestroyWrap(pTree p_tree,pNode p_node)
 	TreeDestroyWrap( p_tree,rightChild);
 	TreeDestroyWrap( p_tree,leftChild);
 	return;
-	
 }
 
 
