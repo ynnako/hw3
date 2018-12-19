@@ -4,6 +4,8 @@
 #include "defs.h"
 #include "expTree.h"
 
+
+pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
 /* definition of a node in the tree */
 typedef struct _node
 {
@@ -25,7 +27,7 @@ typedef struct _tree
 	CompareKeyFunction	compare_keys;
 	/* *** complete the definition of the tree structure *** */
 } Tree;
-pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key);
+
 pTree TreeCreate(CloneFunction clone_element, DelFunction delete_element, OperateFunction operate_on_elements, GetKeyFunction get_elements_key, CompareKeyFunction compare_keys)
 {
 	if (clone_element == NULL || delete_element == NULL || operate_on_elements == NULL || get_elements_key == NULL || compare_keys == NULL) return NULL; 
@@ -120,3 +122,5 @@ pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
 	if (p_right != NULL) return p_right;
 	return NULL;
 }
+
+pElement TreeEvaluate()
