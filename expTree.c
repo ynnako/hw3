@@ -46,9 +46,26 @@ pTree TreeCreate(CloneFunction clone_element, DelFunction delete_element, Operat
 }
 
 void TreeDestroy(pTree p_tree)
-{			
-			return;		
+
+{		
+	TreeDestroyWrap( p_tree,p_tree->root);
+	return;		
 }
+
+void TreeDestroyWrap(pTree p_tree,pNode p_node)
+{   
+	if (p_node==NULL) return;
+	p_tree->delete_element(p_node->elem);
+	pNode leftChild = p_node->Child;
+	pNode rightChild = p_node->rightChild;
+	free(p_node);
+	if (p_node->rightChild==NULL && p_node->leftChild==NULL) return;
+	TreeDestroyWrap( p_tree,rightChild);
+	TreeDestroyWrap( p_tree,leftChild);
+	return;
+	
+}
+
 
 pNode TreeAddRoot(pElement p_elem, pTree p_tree)
 {
@@ -123,4 +140,18 @@ pElement recursive_find_element(pTree p_tree, pNode p_node , pKey p_key)
 	return NULL;
 }
 
-pElement TreeEvaluate()
+pElement TreeEvaluate(pTree p_tree)
+
+{
+	return TreeEvaluateWrap(p_tree,p_tree->root);
+	
+}
+
+pElement TreeEvaluateWrap(pTree p_tree,pNode p_node)
+{
+	if(p_node->leftChild==NULL || p_node->rightChild==NULL) return p_node->elem;
+	 pElement Result_left =TreeEvaluateWrap(p_tree,p_node->leftChild);
+	 pElement Result_right =TreeEvaluateWrap(p_tree,p_node->rightChild);
+	 return p_tree->operate_on_elements(p_node->elem,Result_left,Result_right);
+	 
+
