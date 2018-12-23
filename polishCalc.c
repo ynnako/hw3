@@ -10,14 +10,16 @@
 
 
 static pTree p_tree = NULL;
+static CalcElement static_element;
+static pElement p_static_elem = &static_element;
 
 Result tree_build(pTree p_tree, pNode p_node, char* str)
 {
 	if (p_tree == NULL || p_node == NULL || str == NULL || *str == 0)return FAILURE; //need to re think
 
-	CalcElement new_element = create_element(str);
+	if (create_element(str) == FAILURE) return FAILURE;
 	
-	p_node->leftChild = p_tree->TreeAddLeftChild(p_tree, p_node, new_element);
+	p_node->leftChild = p_tree->TreeAddLeftChild(p_tree, p_node, p_static_elem);
 	
 	if (p_node->leftChild == NULL) return FAILURE;
 	
@@ -25,7 +27,7 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 	{
 		if (tree_build(p_tree, p_node->leftChild, str) == FAILURE) return FAILURE;	
 	}
-	new_element = create_element(str);
+	if (create_element(str) == FAILURE) return FAILURE;
 	
 	p_node->rightChild = p_tree->TreeAddRightChild(p_tree, p_node, new_element);
 	
@@ -40,38 +42,42 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 
 
 
-CalcElement create_element(char* elem_str)
+Result create_element(char* elem_str)
 {	
-	CalcElement new_element;
-
 	elem_str = strtok(NULL, ' ');
 	
+	if (elem_str == NULL || *elem_str == 0) return FAILURE;
+
 	if (*elem_str == '+' || *elem_str == '*' || *elem_str == '/' || *elem_str == '-')
 	{
-		new_element->type = OPERATOR;
-		if (*elem_str == '+')
-			new_element->opType = ADD;
-		else if (*elem_str == '*')
-			new_element->opType = MUL;
-		else if (*elem_str == '/')
-			new_element->opType = DIV;
-		else if (*elem_str == '-')
-			new_element->opType = SUB;
-	}
-	if (*elem_str >= '0' && *elem_str <= '9')
-	{
-		p_new_element->type = OPERAND;
-		p_new_element->val = atof(elem_str); //check with e (exponent)
+		p_static_elem->type = OPERATOR;
+	
+		if (*elem_str == '+') p_static_elem->opType = ADD;
+		
+		else if (*elem_str == '*') p_static_elem->opType = MUL;
+		
+		else if (*elem_str == '/') p_static_elem->opType = DIV;
+		
+		else if (*elem_str == '-') p_static_elem->opType = SUB;
 
+		p_static_elem->key = NULL;
 	}
-	else if (*elem_str >= 'a' && *elem_str <= 'z' || *elem_str >= 'A' && *elem_str <='Z')
+	else if (*elem_str >= '0' && *elem_str <= '9')
 	{
-		p_new_element->type = SYMBOL;
-		p_new_element->val = 0;
-		new_element->key = elem_str;  //check if i need to copy or is this ok
+		p_static_elem->type = OPERAND;
+		
+		p_static_elem->val = atof(elem_str); //check with e (exponent)
+
+		p_static_elem->key = NULL;
+	}
+	else 
+	{
+		p_static_elem->type = SYMBOL;
+		p_static_elem->val = 0;
+		p_static_elem->key = elem_str;  //check if i need to copy or is this ok
 	}
 
-	return new_element;
+	return;
 }
 
 CloneFunction name_clone(pElement e)
@@ -102,24 +108,39 @@ CompareKeyFunction name_compare(const pKey key1, const pKey key2)
 Result InitExpression(char* exp)
 {
 	if (p_tree != NULL) DeleteExpression();
+
 	if (exp == NULL || *exp == 0) return FAILURE;
+	
 	p_tree = TreeCreate(name_clone, name_del, name_op, name_get, name_compare)
+	
 	if (p_tree == NULL)
 	{
 		free(p_tree);
+	
 		return FAILURE;
 	}
-	p_tree->root = TreeAddRoot(create_element(exp) , p_tree);
+	
+	if(create_element(exp) == FAILURE) return FAILURE;
+	
+	p_tree->root = TreeAddRoot(p_static_elem , p_tree);
+	
 	if (p_tree->root == NULL)
 	{
 		DeleteExpression();
+	
 		return FAILURE;
 	}
-	if (tree_build(p_tree, p_tree->root, exp) == FAILURE)
+	
+	if (p_tree->root->elem->type == OPERATOR)
 	{
-		DeleteExpression();
-		return FAILURE;
+		if (tree_build(p_tree, p_tree->root, exp) == FAILURE)
+		{
+			DeleteExpression();
+	
+			return FAILURE;
+		}
 	}
+	
 	return SUCCESS;
 }
 

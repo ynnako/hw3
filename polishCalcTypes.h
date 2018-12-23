@@ -31,7 +31,5 @@ typedef struct
 	float				val;
 
 } CalcElement;
-
-typedef CalcElement* pCalcElement;
 #endif	// POLISH_CALC_TYPES_H
 
