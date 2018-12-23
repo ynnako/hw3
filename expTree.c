@@ -62,7 +62,7 @@ void TreeDestroyWrap(pTree p_tree,pNode p_node)
 {   
 	if (p_node==NULL) return;
 	p_tree->delete_element(p_node->elem);
-	pNode leftChild = p_node->Child;
+	pNode leftChild = p_node->leftChild;
 	pNode rightChild = p_node->rightChild;
 	free(p_node);
 	if (p_node->rightChild==NULL && p_node->leftChild==NULL) return;
@@ -152,7 +152,7 @@ pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key)
 {
 	pElement p_left, p_right;
 	if (p_node == NULL)return NULL;
-	if (p_tree->CompareKeyFunction(p_key, p_tree->get_elements_key(p_node->elem))) return p_node->elem;/*check this condition*/
+	if (p_tree->compare_keys(p_key, p_tree->get_elements_key(p_node->elem)) != 0) return p_node->elem;/*check this condition*/
 	p_left = recursive_find_element(p_tree, p_node->leftChild, p_key);
 	p_right = recursive_find_element(p_tree, p_node->rightChild, p_key);
 	if (p_left != NULL) return p_left;
