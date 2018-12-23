@@ -84,7 +84,7 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 
 
 
-PcalcElement clone_function(pElement e)
+pElement clone_function(pElement e)
 {
 	PcalcElement p_new_element=(PcalcElement)malloc(sizeof(CalcElement));
 	if (p_new_element==NULL) return NULL;
@@ -94,54 +94,55 @@ PcalcElement clone_function(pElement e)
 		p_new_element->key = p_element->key;/*check if need to allocate*/
 		p_new_element->opType = p_element->opType;
 		p_new_element->val = p_element->val;
-	return p_new_element;
+	return (PcalcElement) p_new_element;
 }
 
 
 
-DelFunction del_element(pElement e)
+void del_element(pElement e)
 {
 	/*check if need to free fields in the element*/
 	PcalcElement p_elemt=(PcalcElement) e;
 	free(p_elemt);
+	return;
 }
 
-PcalcElement operate_function(pElement op, pElement left, pElement right)
+pElement operate_function(pElement op, pElement left, pElement right)
 {
 	PcalcElement p_operator= (PcalcElement) op;
 	PcalcElement p_operanL = (PcalcElement) left;
 	PcalcElement p_operandR= (PcalcElement) right;
-	float result ;
+	float  tmp_result ;
  
 	switch(p_operator->opType) {
 
 		case ADD  :
-			result= p_operanL->val+p_operandR->val;
+			tmp_result = p_operanL->val+p_operandR->val;
 		break; 
 	
-		case SUB  :	
-			result= p_operanL->val-p_operandR->val;
+		case SUB  :
+			tmp_result = p_operanL->val-p_operandR->val;
 		break; 
 		
 		case MUL  :
-			result= p_operanL->val*p_operandR->val;
+			tmp_result = p_operanL->val*p_operandR->val;
 		break; 
 	
 		case DIV  :
-			result= p_operanL->val/p_operandR->val;
+			tmp_result = p_operanL->val/p_operandR->val;
 		break; 
 	}
-	p_result->val=result;
+	p_result->val = tmp_result;
 	//return result;  
-	 return p_result; 
+	 return (PcalcElement) p_result;
 }
 
-char* get_key_p(pElement elem)
+pKey get_key_p(pElement elem)
 {
 	PcalcElement p_elem = (PcalcElement) elem;
 	if (p_elem->key == NULL) return NULL;
 	
-	return p_elem->key;
+	return (char*) p_elem->key;
 }
 
 Bool compare_keys(const pKey key1, const pKey key2)
@@ -159,7 +160,7 @@ Result InitExpression(char* exp)
 
 	if (exp == NULL || *exp == 0) return FAILURE;
 	
-	p_tree = TreeCreate((pElement)clone_function, (void*)del_element, (pElement)operate_function, (pKey)get_key_p, compare_keys);
+	p_tree = TreeCreate(clone_function, del_element, operate_function, get_key_p, compare_keys);
 	
 	if (p_tree == NULL)
 	{
