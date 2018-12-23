@@ -10,15 +10,12 @@
 
 
 typedef CalcElement* PcalcElement;
-static CalcElement result;
-static PcalcElement p_result= &result;
 static pTree p_tree = NULL;
 static CalcElement static_element;
 static PcalcElement p_static_elem = &static_element;
 
 Result create_element(char* elem_str)
 {
-	elem_str = strtok(NULL, " ");
 
 	if (elem_str == NULL || *elem_str == 0) return FAILURE;
 
@@ -56,7 +53,8 @@ Result create_element(char* elem_str)
 
 Result tree_build(pTree p_tree, pNode p_node, char* str)
 {
-	pNode p_new_node_left, p_new_node_right;
+    str = strtok(NULL, " ");
+    pNode p_new_node_left, p_new_node_right;
 	if (p_tree == NULL || p_node == NULL || str == NULL || *str == 0)return FAILURE; //need to re think
 
 	if (create_element(str) == FAILURE) return FAILURE;
@@ -69,6 +67,7 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 	{
 		if (tree_build(p_tree, p_new_node_left, str) == FAILURE) return FAILURE;
 	}
+    str = strtok(NULL, " ");
 	if (create_element(str) == FAILURE) return FAILURE;
 	
 	p_new_node_right = TreeAddRightChild(p_tree, p_node, p_static_elem);
@@ -109,11 +108,18 @@ void del_element(pElement e)
 
 pElement operate_function(pElement op, pElement left, pElement right)
 {
-	PcalcElement p_operator= (PcalcElement) op;
+	if( op == NULL || left == NULL || right == NULL) return NULL;
+    PcalcElement p_operator= (PcalcElement) op;
 	PcalcElement p_operanL = (PcalcElement) left;
 	PcalcElement p_operandR= (PcalcElement) right;
 	float  tmp_result ;
- 
+    PcalcElement p_result_elem = (PcalcElement)malloc(sizeof(CalcElement));
+    if(p_result_elem == NULL)
+    {
+        free(left);
+        free(right);
+        return NULL;
+    }
 	switch(p_operator->opType) {
 
 		case ADD  :
@@ -132,22 +138,23 @@ pElement operate_function(pElement op, pElement left, pElement right)
 			tmp_result = p_operanL->val/p_operandR->val;
 		break; 
 	}
-	p_result->val = tmp_result;
-	//return result;  
-	 return (PcalcElement) p_result;
+    p_result_elem->val = tmp_result;
+	//return result;
+	free(left);
+	free(right);
+	return (PcalcElement) p_result_elem;
 }
-
 pKey get_key_p(pElement elem)
 {
-	PcalcElement p_elem = (PcalcElement) elem;
-	if (p_elem->key == NULL) return NULL;
+    PcalcElement p_elem = (PcalcElement) elem;
+    if (p_elem->key == NULL) return NULL;
 	
 	return (char*) p_elem->key;
 }
 
 Bool compare_keys(const pKey key1, const pKey key2)
 {
-
+    if(key2 == NULL) return FALSE;
 	if (strcmp((char*) key1,(char*) key2) == 0) return TRUE ;
 	return FALSE;
 
@@ -155,7 +162,8 @@ Bool compare_keys(const pKey key1, const pKey key2)
 
 Result InitExpression(char* exp)
 {
-	pNode p_root;
+	char* new_exp = NULL;
+    pNode p_root;
 	if (p_tree != NULL) DeleteExpression();
 
 	if (exp == NULL || *exp == 0) return FAILURE;
@@ -168,8 +176,8 @@ Result InitExpression(char* exp)
 	
 		return FAILURE;
 	}
-	
-	if(create_element(exp) == FAILURE) return FAILURE;
+    new_exp = strtok(exp, " ");
+	if(create_element(new_exp) == FAILURE) return FAILURE;
 	
 	p_root = TreeAddRoot(p_static_elem , p_tree);
 	
@@ -182,7 +190,7 @@ Result InitExpression(char* exp)
 	
 	if (p_static_elem->type == OPERATOR)
 	{
-		if (tree_build(p_tree, p_root, exp) == FAILURE)
+		if (tree_build(p_tree, p_root, new_exp) == FAILURE)
 		{
 			DeleteExpression();
 	
@@ -196,11 +204,11 @@ Result InitExpression(char* exp)
 /* Set symbol value */
 Result SetSymbolVal(char* symName, float val)
 {
-	if (symName==NULL) return 0;/*fail*/
+	if (symName==NULL) return FAILURE;/*fail*/
 	PcalcElement p_2elem=TreeFindElement(p_tree,symName);
-	if (p_2elem==NULL) return 0;/*false*/
+	if (p_2elem==NULL) return FAILURE;/*false*/
 	p_2elem->val=val;
-	return 1;
+	return SUCCESS;
 
 }
 
@@ -210,6 +218,7 @@ Result EvaluateExpression(float *res)
 	PcalcElement p_2result = TreeEvaluate(p_tree);
 	if (p_2result == NULL) return FAILURE;
 	 *res = p_2result->val;
+	 free(p_2result);
 	 return SUCCESS;
 }
 

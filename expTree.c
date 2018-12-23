@@ -142,10 +142,17 @@ pElement TreeEvaluate(pTree p_tree)
 // asistive functions implementation
 pElement recursive_eval(pTree p_tree,pNode p_node)
 {
-	if(p_node->leftChild==NULL || p_node->rightChild==NULL) return p_node->elem;
+	if(p_node->leftChild==NULL || p_node->rightChild==NULL)
+    {
+	    pElement p_operand = p_tree->clone_element(p_node->elem);
+	    return p_operand;
+    }
 	pElement Result_left =recursive_eval(p_tree,p_node->leftChild);
+	if (Result_left == NULL) return NULL;
 	pElement Result_right =recursive_eval(p_tree,p_node->rightChild);
-	return p_tree->operate_on_elements(p_node->elem,Result_left,Result_right);
+	if (Result_right == NULL) return NULL;
+    pElement p_total_result = p_tree->operate_on_elements(p_node->elem,Result_left,Result_right);
+    return p_total_result;
 }
 
 pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key)
