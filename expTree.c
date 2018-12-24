@@ -156,7 +156,7 @@ pElement recursive_eval(pTree p_tree,pNode p_node)
 pElement recursive_find_element(pTree p_tree, pNode p_node, pKey p_key)
 {
 	pElement p_left, p_right;
-	if (p_node == NULL)return NULL;
+	if (p_node == NULL || p_key == NULL || p_tree == NULL) return NULL;
 	if (p_tree->compare_keys(p_key, p_tree->get_elements_key(p_node->elem)) != 0) return p_node->elem;/*check this condition*/
 	p_left = recursive_find_element(p_tree, p_node->leftChild, p_key);
 	p_right = recursive_find_element(p_tree, p_node->rightChild, p_key);

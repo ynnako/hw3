@@ -86,6 +86,7 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 
 pElement clone_function(pElement e)
 {
+	if(e == NULL) return NULL;
 	int key_len;
     PcalcElement p_new_element=(PcalcElement)malloc(sizeof(CalcElement));
 	if (p_new_element==NULL) return NULL;
@@ -146,6 +147,7 @@ pElement operate_function(pElement op, pElement left, pElement right)
 		break; 
 	
 		case DIV  :
+		
 			tmp_result = p_operanL->val/p_operandR->val;
 		break; 
 	}
@@ -165,7 +167,7 @@ pKey get_key_p(pElement elem)
 
 Bool compare_keys(const pKey key1, const pKey key2)
 {
-    if(key2 == NULL) return FALSE;
+    if(key2 == NULL || key1 == NULL) return FALSE;
 	if (strcmp((char*) key1,(char*) key2) == 0) return TRUE ;
 	return FALSE;
 
@@ -202,9 +204,9 @@ Result InitExpression(char* exp)
 /* Set symbol value */
 Result SetSymbolVal(char* symName, float val)
 {
-	if (symName==NULL) return FAILURE;/*fail*/
+	if (symName == NULL) return FAILURE;/*fail*/
 	PcalcElement p_2elem=TreeFindElement(p_tree,symName);
-	if (p_2elem==NULL) return FAILURE;/*false*/
+	if (p_2elem == NULL) return FAILURE;/*false*/
 	p_2elem->val=val;
 	return SUCCESS;
 
@@ -212,7 +214,8 @@ Result SetSymbolVal(char* symName, float val)
 
 /* Evaluate expression */
 Result EvaluateExpression(float *res)
-{
+{	
+	if (res == NULL) return FAILURE;
 	PcalcElement p_2result = TreeEvaluate(p_tree);
 	if (p_2result == NULL) return FAILURE;
 	 *res = p_2result->val;
