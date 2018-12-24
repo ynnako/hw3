@@ -64,7 +64,7 @@ void TreeDestroyWrap(pTree p_tree,pNode p_node)
     if (p_node==NULL) return;
     TreeDestroyWrap( p_tree,p_node->leftChild);
     TreeDestroyWrap( p_tree,p_node->rightChild);
-    p_tree->delete_element(p_node->elem);
+    if(p_node->elem != NULL) p_tree->delete_element(p_node->elem);
     free(p_node);
 	return;
 }

@@ -11,7 +11,7 @@
 
 typedef CalcElement* PcalcElement;
 static pTree p_tree = NULL;
-static CalcElement static_element;
+static CalcElement static_element = {0, NULL, 0, 0};
 static PcalcElement p_static_elem = &static_element;
 
 Result create_element(char* elem_str)
@@ -43,9 +43,10 @@ Result create_element(char* elem_str)
 	}
 	else
 	{
-		p_static_elem->type = SYMBOL;
+
+	    p_static_elem->type = SYMBOL;
 		p_static_elem->val = 0;
-		p_static_elem->key = elem_str;  //check if i need to copy or is this ok
+		p_static_elem->key = elem_str;  //might need to free in clone element
 	}
 
 	return SUCCESS;
@@ -85,12 +86,20 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 
 pElement clone_function(pElement e)
 {
-	PcalcElement p_new_element=(PcalcElement)malloc(sizeof(CalcElement));
+	int key_len;
+    PcalcElement p_new_element=(PcalcElement)malloc(sizeof(CalcElement));
 	if (p_new_element==NULL) return NULL;
 		//e =(PcalcElement) e;/*casting*/
 	PcalcElement p_element= (PcalcElement)	e;
 		p_new_element->type = p_element->type;
-		p_new_element->key = p_element->key;/*check if need to allocate*/
+		key_len = strlen(p_element->key) + 1;
+		p_new_element->key = (char*)malloc(sizeof(char) * key_len);/*check if need to allocate*/
+		if(p_new_element->key)
+        {
+		    free(p_new_element);
+		    return NULL;
+        }
+		strcpy(p_new_element->key, p_element->key);
 		p_new_element->opType = p_element->opType;
 		p_new_element->val = p_element->val;
 	return (PcalcElement) p_new_element;
@@ -101,7 +110,9 @@ pElement clone_function(pElement e)
 void del_element(pElement e)
 {
 	/*check if need to free fields in the element*/
+	if (e == NULL) return;
 	PcalcElement p_elemt=(PcalcElement) e;
+	if (p_elemt->key != NULL) free(p_elemt->key);
 	free(p_elemt);
 	return;
 }
@@ -170,32 +181,19 @@ Result InitExpression(char* exp)
 	
 	p_tree = TreeCreate(clone_function, del_element, operate_function, get_key_p, compare_keys);
 	
-	if (p_tree == NULL)
-	{
-		free(p_tree);
-	
-		return FAILURE;
-	}
+	if (p_tree == NULL) return FAILURE;
+
     new_exp = strtok(exp, " ");
-	if(create_element(new_exp) == FAILURE) return FAILURE;
+
+    if(create_element(new_exp) == FAILURE) return FAILURE;
 	
 	p_root = TreeAddRoot(p_static_elem , p_tree);
 	
-	if (p_root == NULL)
-	{
-		DeleteExpression();
-	
-		return FAILURE;
-	}
+	if (p_root == NULL) return FAILURE;
 	
 	if (p_static_elem->type == OPERATOR)
 	{
-		if (tree_build(p_tree, p_root, new_exp) == FAILURE)
-		{
-			DeleteExpression();
-	
-			return FAILURE;
-		}
+		if (tree_build(p_tree, p_root, new_exp) == FAILURE) return FAILURE;
 	}
 	
 	return SUCCESS;
@@ -226,5 +224,6 @@ Result EvaluateExpression(float *res)
 void DeleteExpression()
 {
 TreeDestroy(p_tree);
+if(p_static_elem->key != NULL) free(p_static_elem->key);
 }
 
