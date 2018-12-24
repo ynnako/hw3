@@ -78,7 +78,7 @@ Result tree_build(pTree p_tree, pNode p_node, char* str)
 	if (p_static_elem->type == OPERATOR)
 	{
 		if (tree_build(p_tree, p_new_node_right, str) == FAILURE) return FAILURE;
-	}	
+	}
 	return SUCCESS;
 }
 
@@ -120,11 +120,12 @@ pElement clone_function(pElement e)
 
 void del_element(pElement e)
 {
-	/*check if need to free fields in the element*/
+    PcalcElement p_element = NULL;
+    /*check if need to free fields in the element*/
 	if (e == NULL) return;
-	PcalcElement p_elemt=(PcalcElement) e;
-	if (p_elemt->key != NULL) free(p_elemt->key);
-	free(p_elemt);
+	p_element = (PcalcElement) e;
+	if (p_element->key != NULL) free(p_element->key);
+	free(p_element);
 	return;
 }
 
@@ -138,8 +139,8 @@ pElement operate_function(pElement op, pElement left, pElement right)
     PcalcElement p_result_elem = (PcalcElement)malloc(sizeof(CalcElement));
     if(p_result_elem == NULL)
     {
-        free(left);
-        free(right);
+        del_element(left);
+        del_element(right);
         return NULL;
     }
 	switch(p_operator->opType) {
@@ -157,14 +158,22 @@ pElement operate_function(pElement op, pElement left, pElement right)
 		break; 
 	
 		case DIV  :
-		
+            if(p_operandR->val == 0)
+            {
+
+                del_element(left);
+                del_element(right);
+                free(p_result_elem);
+                return NULL;
+            }
 			tmp_result = p_operanL->val/p_operandR->val;
 		break; 
 	}
     p_result_elem->val = tmp_result;
+    p_result_elem->key = NULL;
 	//return result;
-	free(left);
-	free(right);
+    del_element(left);
+    del_element(right);
 	return (PcalcElement) p_result_elem;
 }
 pKey get_key_p(pElement elem)
@@ -207,7 +216,8 @@ Result InitExpression(char* exp)
 	{
 		if (tree_build(p_tree, p_root, new_exp) == FAILURE) return FAILURE;
 	}
-	
+    new_exp = strtok(NULL, " ");
+	if(new_exp != NULL) return FAILURE;
 	return SUCCESS;
 }
 
@@ -229,7 +239,7 @@ Result EvaluateExpression(float *res)
 	PcalcElement p_2result = TreeEvaluate(p_tree);
 	if (p_2result == NULL) return FAILURE;
 	 *res = p_2result->val;
-	 free(p_2result);
+    del_element(p_2result);
 	 return SUCCESS;
 }
 
