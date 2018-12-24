@@ -91,19 +91,29 @@ pElement clone_function(pElement e)
     PcalcElement p_new_element=(PcalcElement)malloc(sizeof(CalcElement));
 	if (p_new_element==NULL) return NULL;
 		//e =(PcalcElement) e;/*casting*/
-	PcalcElement p_element= (PcalcElement)	e;
-		p_new_element->type = p_element->type;
-		key_len = strlen(p_element->key) + 1;
-		p_new_element->key = (char*)malloc(sizeof(char) * key_len);/*check if need to allocate*/
-		if(p_new_element->key)
+		PcalcElement p_element= (PcalcElement)	e;
+
+	p_new_element->type = p_element->type;
+
+		if(p_element->key != NULL)
         {
-		    free(p_new_element);
-		    return NULL;
+		    key_len = strlen(p_element->key) + 1;
+            p_new_element->key = (char*)malloc(sizeof(char) * key_len);/*check if need to allocate*/
+            if(p_new_element->key == NULL)
+            {
+                free(p_new_element);
+                return NULL;
+            }
+            strcpy(p_new_element->key, p_element->key);
         }
-		strcpy(p_new_element->key, p_element->key);
+
+		else p_new_element->key = NULL;
+
 		p_new_element->opType = p_element->opType;
+
 		p_new_element->val = p_element->val;
-	return (PcalcElement) p_new_element;
+
+		return (PcalcElement) p_new_element;
 }
 
 
@@ -226,7 +236,6 @@ Result EvaluateExpression(float *res)
 /* Destroy expression */
 void DeleteExpression()
 {
-TreeDestroy(p_tree);
-if(p_static_elem->key != NULL) free(p_static_elem->key);
+    TreeDestroy(p_tree);
 }
 
