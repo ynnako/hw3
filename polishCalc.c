@@ -17,7 +17,7 @@ static PcalcElement p_static_elem = &static_element;
  *  Description:    this function creates an element from the parsed string according to its
  *                  content
  *  Parameters:     @param elem_str - the parsed string.
- * Return value:    the function returns a success value if the tree was built corectlly.
+ *  Return value:   the function returns a success value if the tree was built corectlly.
  ***********************************************************************************************/
 Result create_element(char *elem_str) {
     if (elem_str == NULL || *elem_str == 0) return FAILURE;
@@ -57,7 +57,7 @@ Result create_element(char *elem_str) {
  *  Parameters:     @param p_tree - a pointer to the tree.
  *                  @param p_node - a pointer to a node.
  *                  @param str - a pointer to the stline
- * Return value:    the function returns a success value if the tree was built correctly.
+ *  Return value:   the function returns a success value if the tree was built correctly.
  ***********************************************************************************************/
 Result tree_build(pTree p_tree, pNode p_node, char *str) {
 
@@ -89,10 +89,10 @@ Result tree_build(pTree p_tree, pNode p_node, char *str) {
 }
 
 /**********************************************************************************************
-*  function name:  calc_element_cloner
-*  Description:    this function gets an element and clones it
-*  Parameters:     @param src_element - a pointer to the tree.
-* Return value:    a pointer to the new cloned element.
+*  function name:   calc_element_cloner
+*  Description:     this function gets an element and clones it
+*  Parameters:      @param src_element - a pointer to the tree.
+*  Return value:    a pointer to the new cloned element.
 ***********************************************************************************************/
 pElement calc_element_cloner(pElement src_element) {
     if (src_element == NULL) return NULL;
@@ -123,10 +123,10 @@ pElement calc_element_cloner(pElement src_element) {
 
 
 /**********************************************************************************************
-*  function name:  destroy_calc_element
-*  Description:    this function get an element and frees its memory, including any memory allocated for its key
-*  Parameters:     @param c_element - a pointer to the element.
-* Return value:    None.
+*  function name:   destroy_calc_element
+*  Description:     this function get an element and frees its memory, including any memory allocated for its key
+*  Parameters:      @param c_element - a pointer to the element.
+*  Return value:    None.
 ***********************************************************************************************/
 void destroy_calc_element(pElement c_element) {
     PcalcElement p_element = NULL;
@@ -136,19 +136,24 @@ void destroy_calc_element(pElement c_element) {
     free(p_element);
 }
 
+/**********************************************************************************************
+*  function name:   operate_function
+*  Description:     this function gets three calc elements and calculates the operation of
+*                   left on right.
+*  Parameters:      @param op
+*                   @param left
+*                   @param right
+*  Return value:    a pointer to an element that holds the result.
+***********************************************************************************************/
 pElement operate_function(pElement op, pElement left, pElement right) {
     if (op == NULL || left == NULL || right == NULL) return NULL;
     PcalcElement p_operator = (PcalcElement) op;
     PcalcElement p_operanL = (PcalcElement) left;
     PcalcElement p_operandR = (PcalcElement) right;
-    PcalcElement p_result_elem = (PcalcElement) malloc(sizeof(CalcElement));
+    PcalcElement p_result_elem = (PcalcElement) malloc(sizeof(CalcElement)); // this is the element that would hold the result
     float tmp_result = 0;
 
-    if (p_result_elem == NULL) {
-        destroy_calc_element(left);
-        destroy_calc_element(right);
-        return NULL;
-    }
+    if (p_result_elem == NULL) return NULL;
     switch (p_operator->opType) {
 
         case ADD  :
@@ -164,10 +169,8 @@ pElement operate_function(pElement op, pElement left, pElement right) {
             break;
 
         case DIV  :
-            if (p_operandR->val == 0) {
-                destroy_calc_element(left);
-                destroy_calc_element(right);
-                free(p_result_elem);
+            if (p_operandR->val == 0) { //cant divide by zero
+                free(p_result_elem); //this element was allocated as in the beginning of this function
                 return NULL;
             }
             tmp_result = p_operanL->val / p_operandR->val;
@@ -175,24 +178,40 @@ pElement operate_function(pElement op, pElement left, pElement right) {
     }
     p_result_elem->val = tmp_result;
     p_result_elem->key = NULL;
-    //return result;
-    destroy_calc_element(left);
-    destroy_calc_element(right);
     return (PcalcElement) p_result_elem;
 }
 
+/**********************************************************************************************
+*  function name:   get_calcElement_key
+*  Description:     gets an element and returns a pointer to the value of key field
+*  Parameters:      @param calc_element
+*  Return value:    a pointer to the string containing the calc element's key
+***********************************************************************************************/
 pKey get_calcElement_key(pElement calc_element) {
     PcalcElement p_calc_element = (PcalcElement) calc_element;
-    if (p_calc_element->key == NULL) return NULL;
     return p_calc_element->key;
 }
 
+/**********************************************************************************************
+*  function name:   compare_keys
+*  Description:     compares two keys
+*  Parameters:      @param key1
+*                   @param key2
+*  Return value:    success = equal or failure = not equal
+***********************************************************************************************/
 Bool compare_keys(const pKey key1, const pKey key2) {
     if (key2 == NULL || key1 == NULL) return FALSE;
     if (strcmp((char *) key1, (char *) key2) == 0) return TRUE;
     return FALSE;
 }
 
+
+/**********************************************************************************************
+*  function name:   InitExpression
+*  Description:     builds a tree from the expression
+*  Parameters:      @param exp - a pointer to a string that holds the expression.
+*  Return value:    success = a tree was created or failure = failed to create a tree.
+***********************************************************************************************/
 Result InitExpression(char *exp) {
     char *new_exp = NULL;
     pNode p_root;
@@ -204,7 +223,7 @@ Result InitExpression(char *exp) {
 
     if (p_tree == NULL) return FAILURE;
 
-    new_exp = strtok(exp, " ");
+    new_exp = strtok(exp, " "); // get first operator/symbol/operand (for the root)
 
     if (create_element(new_exp) == FAILURE) return FAILURE;
 
@@ -212,25 +231,35 @@ Result InitExpression(char *exp) {
 
     if (p_root == NULL) return FAILURE;
 
-    if (p_static_elem->type == OPERATOR) {
-        if (tree_build(p_tree, p_root, new_exp) == FAILURE) return FAILURE;
+    if (p_static_elem->type == OPERATOR) { // an operation needs to be preformed
+        if (tree_build(p_tree, p_root, new_exp) == FAILURE) return FAILURE; // call recursive function and check result
     }
-    new_exp = strtok(NULL, " ");
+    new_exp = strtok(NULL, " "); //make sure we didnt get an invalid input by checking if we got to the end of the string
     if (new_exp != NULL) return FAILURE;
     return SUCCESS;
 }
 
-/* Set symbol value */
+/**********************************************************************************************
+*  function name:   SetSymbolVal
+*  Description:     assigns a value to a given symbol
+*  Parameters:      @param symName  - the name of the symbol.
+*                   @param val - the value that would be assigned.
+*  Return value:    success = the value was assigned or failure = no value assigned.
+***********************************************************************************************/
 Result SetSymbolVal(char *symName, float val) {
     if (symName == NULL) return FAILURE;/*fail*/
-    PcalcElement p_2elem = TreeFindElement(p_tree, symName);
+    PcalcElement p_2elem = TreeFindElement(p_tree, symName); //find the symbol inside the tree.
     if (p_2elem == NULL) return FAILURE;/*false*/
     p_2elem->val = val;
     return SUCCESS;
 
 }
-
-/* Evaluate expression */
+/**********************************************************************************************
+*  function name:   EvaluateExpression
+*  Description:     preform calculation of the calc tree's expression
+*  Parameters:      @param res - a pointer which would hold the result at the end.
+*  Return value:    success = calculation was successful or failure = unable to preform calculation.
+***********************************************************************************************/
 Result EvaluateExpression(float *res) {
     if (res == NULL) return FAILURE;
     PcalcElement p_2result = TreeEvaluate(p_tree);
@@ -240,7 +269,12 @@ Result EvaluateExpression(float *res) {
     return SUCCESS;
 }
 
-/* Destroy expression */
+/**********************************************************************************************
+*  function name:   DeleteExpression
+*  Description:     remove tree from memory
+*  Parameters:      None
+*  Return value:    None
+***********************************************************************************************/
 void DeleteExpression() {
     TreeDestroy(p_tree);
 }
